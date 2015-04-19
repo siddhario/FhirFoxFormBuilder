@@ -1,0 +1,142 @@
+﻿<#@ template language="C#" #>
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <link data-require="bootstrap-css@3.0.1" data-semver="3.0.1" rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css" />
+	  	<link rel="stylesheet" href="angucomplete-alt.css"/>
+    <script src="http://code.angularjs.org/1.3.0/angular.js" data-semver="1.3.0" data-require="angular.js@1.3.0"></script>
+    <script data-require="jquery@*" data-semver="2.0.3" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script data-require="bootstrap@3.0.1" data-semver="3.0.1" src="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+	 <script src="ui-bootstrap-tpls-0.12.1.min.js"></script>
+	 <script src="angucomplete-alt.js"></script>
+	<link rel="stylesheet" href="style.css" />
+
+    <script src="script.js"></script>	
+		<script src="dataFactory.js"></script>	
+  </head>
+
+  
+
+  <body ng-app="myApp" >
+  <div ng-controller="NewUserController">
+    <h1><#=StrucDef.name!=null?StrucDef.name:""#></h1>
+	<ul>	
+		<li><b>Publisher: </b><#=StrucDef.publisher!=null?StrucDef.publisher:""#></li>
+		<li><b>Url: </b><a href="<#=StrucDef.url!=null?StrucDef.url:""#>"><#=StrucDef.url!=null?StrucDef.url:""#></a></li>
+		<li><b>Description: </b><#=StrucDef.description!=null?StrucDef.description:""#></li>
+		<li><b>Date: </b><#=StrucDef.date!=null?StrucDef.date:""#></li>
+		<li><b>Base: </b><a href="<#=StrucDef._base!=null?StrucDef._base:""#>"><#=StrucDef._base!=null?StrucDef._base:""#></a></li>
+	</ul>
+		
+    <form name="userForm" novalidate>
+	<#for(int i=0;i<StrucDef.snapshot.element.Length;i++)
+	{
+		Element el = StrucDef.snapshot.element[i];	
+		if(el.type!=null && el.type.Length==1)
+		{
+			if(el.type[0].code=="code" || el.type[0].code=="CodeableConcept" || el.type[0].code=="string")
+			{
+					string vsr="";
+					if(el.binding!=null && el.binding.valueSetReference!=null )
+					{
+						vsr = el.binding.valueSetReference.reference; 
+					}
+				#>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group" show-errors='{showSuccess: true}'>
+							<label class="control-label"><#=el.path#></label>
+							<div 
+								name="<#=el.path.Replace(".","_")#>" 
+								angucomplete-alt id="ex12" 
+								placeholder="<#=el._short#>" 
+								pause="100" 
+								selected-object="<#=el.path.Replace(".","_")#>" 
+								local-data="VS_<#=el.path.Replace(".","_")#>" 
+								search-fields="display" 
+								title-field="display" 
+								minlength="1" 
+								input-class="form-control form-control-small small-input" 
+								match-class="highlight" 
+								focus-in="focusIn('VS_<#=el.path.Replace(".","_")#>','<#=vsr#>')" 
+								focus-out="focusOut()">
+							</div>
+						</div>
+					</div>
+				</div>
+		<#	}
+			
+			else if(el.type[0].code=="string")
+			{#>	
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group" show-errors='{showSuccess: true}'>
+							<label class="control-label"><#=el.path#></label>
+							<input type="text" class="form-control" name="<#=el.path.Replace(".","_")#>" ng-model="<#=el.path#>" <#if(el.min==1){#> required  <#}#> 
+							placeholder="<#=el._short#>" />
+							<p class="help-block" ng-if="userForm.<#=el.path.Replace(".","_")#>.$error.required"><#=el.path#> field is required</p>
+						</div>
+					</div>
+				</div>
+					<#} else  if(el.type[0].code=="boolean") 
+					{#>
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group" show-errors='{showSuccess: true}'>
+									<label class="control-label"><#=el.path#></label>				
+								
+									<input type="checkbox" class="form-control" name="<#=el.path.Replace(".","_")#>" ng-model="<#=el.path#>" />
+									<label class="help-block"><#=el._short#></label>
+								</div>
+							</div>
+						</div>
+				
+
+			<#} else  if(el.type[0].code=="integer" || el.type[0].code=="decimal") 
+			{#>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="form-group" show-errors='{showSuccess: true}'>
+							<label class="control-label"><#=el.path#></label>
+							<input  type="text" class="form-control" name="<#=el.path.Replace(".","_")#>" ng-model="<#=el.path#>" <#if(el.min==1){#> required  <#}#> 
+							placeholder="<#=el._short#>" integer/>
+							<p class="help-block" ng-if="userForm.<#=el.path.Replace(".","_")#>.$error.integer"><#=el.path#> field is not a valid integer</p>
+							<p class="help-block" ng-if="userForm.<#=el.path.Replace(".","_")#>.$error.required"><#=el.path#> field is required</p>
+						</div>
+					</div>
+				</div>
+		
+			<#} else  if(el.type[0].code=="dateTime") 
+			{#>
+			<div class="row">
+			   <div class="col-md-6">
+				<div class="form-group" show-errors='{showSuccess: true}' ng-controller="DatepickerDemoCtrl">
+					<label class="control-label"><#=el.path#></label>
+					<p class="input-group">
+				  <input name="<#=el.path.Replace(".","_")#>" type="text" class="form-control" datepicker-popup="{{format}}" ng-model="<#=el.path#>" 
+				  is-open="opened" min-date="minDate" max-date="'2015-06-22'" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" 
+				  <#if(el.min==1){#>ng-required="true"<#}#> close-text="Close" placeholder="<#=el._short#>"  />
+				  <span class="input-group-btn">
+					<button type="button" class="btn btn-default" ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+				  </span>
+				  </p>
+			  		<p class="help-block" ng-if="userForm.<#=el.path.Replace(".","_")#>.$error.required"><#=el.path#> field is required</p>
+					 <p class="help-block" ng-if="userForm.<#=el.path.Replace(".","_")#>.$error.date"><#=el.path#> field is not a valid date</p>
+					</div>
+				</div>
+			  </div>
+			<#}
+		}
+	  }#>
+      
+      <button class="btn btn-primary" ng-click="save()">Save</button>
+      <button class="btn btn-link" ng-click="reset()">Reset</button>
+    </form>
+	</div>
+  </body>
+
+</html>
